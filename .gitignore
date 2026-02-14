@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+/coverage
+
+# Testing
+.nyc_output
+
+# Production
+build
+dist
+.cache
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+yarn.lock.pm
+*.gz
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode
