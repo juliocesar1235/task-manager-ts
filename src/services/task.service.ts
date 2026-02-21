@@ -19,7 +19,7 @@ export class TaskService {
             id: (this.nextId++).toString(),
             title: taskData.title,
             description: taskData.description || '',
-            status: taskData.status || 'pending',
+            status: taskData.status || 'PENDING',
             createdAt: new Date(),
             updatedAt: new Date()
         }
@@ -46,9 +46,13 @@ export class TaskService {
         return updatedTask;
     }
 
-    delete(id: string): void {
+    delete(id: string): boolean {
         const initialLength = this.tasks.length;
         this.tasks = this.tasks.filter(task => task.id !== id);
+        if (initialLength === this.tasks.length) {
+            return false;
+        }
+        return true;
     }
 
 }

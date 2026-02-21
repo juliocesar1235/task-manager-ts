@@ -1,15 +1,16 @@
 import type { Request, Response } from "express";
-import type { CreateTaskDTO } from "../types/task.dto";
-import { taskService, TaskService } from "../services/task.service";
+import type { CreateTaskDTO, UpdateTaskDTO } from "../types/task.dto";
+import { TaskService } from "../services/task.service";
 import type { ApiResponse } from "../types/response.dto";
-import type { Task } from "../models/task.model";
+import { TASK_STATUSES, type Task } from "../models/task.model";
+import { handleError } from "./response";
 
 
 export class TaskController {
 
     constructor(private taskService: TaskService){}
 
-    getAllTasks(req: Request, res: Response<ApiResponse<Task[]>>): void {
+    getAllTasks = (req: Request, res: Response<ApiResponse<Task[]>>): void  => {
         try {
             const tasks = this.taskService.getAll();
             res.status(200).json({
@@ -17,15 +18,11 @@ export class TaskController {
                 data: tasks
             });
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error fetching tasks',
-                error: error instanceof Error ? error.message : 'Unknown error',
-            })
+            handleError(res, 'Couldnt retrieve all tasks', error);
         }
     }
 
-    getTaskById(req: Request<{id: string}>, res: Response<ApiResponse<Task>>): void {
+    getTaskById = (req: Request<{id: string}>, res: Response<ApiResponse<Task>>): void => {
         try{
             const {id} = req.params;
             const task = this.taskService.getById(id);
@@ -42,15 +39,11 @@ export class TaskController {
                 data: task,
             });
         } catch(error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error fetching task',
-                error: error instanceof Error ? error.message : 'Unknown error',
-            })
+            handleError(res, 'Error fetching task', error)
         }
     }
 
-    createTask(req: Request<{}, {}, CreateTaskDTO>, res: Response<ApiResponse<Task>>): void {
+    createTask = (req: Request<{}, {}, CreateTaskDTO>, res: Response<ApiResponse<Task>>): void => {
         try {
             const taskData: CreateTaskDTO = req.body;
 
@@ -58,6 +51,14 @@ export class TaskController {
                 res.status(400).json({
                     success: false,
                     message: 'Title is required',
+                });
+                return;
+            }
+
+            if (taskData.status && !TASK_STATUSES.includes(taskData.status)) {
+                res.status(400).json({
+                    success: false,
+                    message: `Invalid status. Must be one of: ${TASK_STATUSES.join(', ')}`,
                 });
                 return;
             }
@@ -70,11 +71,82 @@ export class TaskController {
                 data: newTask,
             });
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error creating task',
-                error: error instanceof Error ? error.message : 'Unknown error',
-            })
+            handleError(res, 'Error creating task', error);
+        }
+    }
+
+    updateTask = (req: Request<{id: string}, {}, UpdateTaskDTO>, res: Response<ApiResponse<Task>>): void => {
+        try {
+            const {id} = req.params;
+
+            const taskData: UpdateTaskDTO = req.body;
+
+            if (!taskData.title && !taskData.description && !taskData.status){
+                res.status(400).json({
+                    success: false,
+                    message: 'At least one field (title,description,status) is required to update',
+                });
+                return;
+            }
+
+            if (!taskData.description || taskData.description.trim() === '') {
+                res.status(400).json({
+                    success: false,
+                    message: 'Cannot add empty descriptions',
+                });
+                return;
+            }
+
+            if (taskData.status && !TASK_STATUSES.includes(taskData.status)) {
+                res.status(400).json({
+                    success: false,
+                    message: `Invalid status. Must be one of: ${TASK_STATUSES.join(', ')}`,
+                });
+                return;
+            }
+
+
+            const updatedTask = this.taskService.update(id, taskData)
+
+            if (!updatedTask) {
+                res.status(404).json({
+                    success: false,
+                    message: `Task with id ${id} not found`,
+                });
+                return;
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Task updated successfully',
+                data:  updatedTask,
+            });
+
+        } catch (error) {
+            handleError(res, 'Error updating task', error);
+        }
+    }
+
+    deleteTask = (req: Request<{id: string}, {}, {}>, res: Response<ApiResponse>): void => {
+        try {
+            const {id} = req.params;
+        
+            const deleted = this.taskService.delete(id);
+
+            if (!deleted) {
+                 res.status(404).json({
+                    success: false,
+                    message: `Task with id ${id} not found`,
+                });
+                return;
+            }
+
+            res.status(200).json({
+                    success: true,
+                    message: 'Task deleted successfully',
+                });
+        } catch(error){
+            handleError(res, 'Error deleting task', error);
         }
     }
 }
