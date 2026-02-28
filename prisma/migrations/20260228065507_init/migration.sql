@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "TASK" ALTER COLUMN "description" DROP NOT NULL,
+ALTER COLUMN "description" DROP DEFAULT,
+ALTER COLUMN "deletedAt" DROP NOT NULL;

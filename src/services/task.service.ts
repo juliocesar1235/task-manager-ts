@@ -1,60 +1,28 @@
 import type { Task } from "../models/task.model";
+import type { ITaskRepository } from "../repositories/interfaces/task.repository.interface";
 import type { CreateTaskDTO, UpdateTaskDTO } from "../types/task.dto";
 
 
 export class TaskService {
-    private tasks: Task[] = [];
-    private nextId: number = 1;
+    constructor(private readonly taskRepository: ITaskRepository) {}
 
-    getAll(): Task[] {
-        return this.tasks;
+    getAll(): Promise<Task[]> {
+        return this.taskRepository.findAll();
     }
 
-    getById(id: string): Task | undefined {
-        return this.tasks.find(task => task.id === id);
+    getById(id: string): Promise<Task | null> {
+        return this.taskRepository.findById(id);
     }
 
-    create(taskData: CreateTaskDTO): Task {
-        const newTask: Task = {
-            id: (this.nextId++).toString(),
-            title: taskData.title,
-            description: taskData.description || '',
-            status: taskData.status || 'PENDING',
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }
-        this.tasks.push(newTask);
-        return newTask;
+    create(data: CreateTaskDTO): Promise<Task> {
+        return this.taskRepository.create(data);
     }
 
-    update(id: string, data: UpdateTaskDTO): Task | null {
-        const taskIndex = this.tasks.findIndex(task => task.id === id);
-
-        if (taskIndex === -1) {
-            return null
-        }
-
-        const taskToUpdate: Task = this.tasks[taskIndex] as Task;
-
-        const updatedTask: Task = {
-            ...taskToUpdate,
-            ...data,
-            updatedAt: new Date(),
-        }
-
-        this.tasks[taskIndex] = updatedTask;
-        return updatedTask;
+    update(id: string, data: UpdateTaskDTO): Promise<Task | null> {
+        return this.taskRepository.update(id, data)
     }
 
-    delete(id: string): boolean {
-        const initialLength = this.tasks.length;
-        this.tasks = this.tasks.filter(task => task.id !== id);
-        if (initialLength === this.tasks.length) {
-            return false;
-        }
-        return true;
+    delete(id: string): Promise<boolean> {
+        return this.taskRepository.delete(id);
     }
-
 }
-
-export const taskService = new TaskService();

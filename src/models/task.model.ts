@@ -5,7 +5,7 @@ export type TaskStatus = typeof TASK_STATUSES[number];
 export interface Task {
     id: string;
     title: string;
-    description: string;
+    description: string | null;
     status: TaskStatus
     createdAt: Date;
     updatedAt: Date;

@@ -10,9 +10,9 @@ export class TaskController {
 
     constructor(private taskService: TaskService){}
 
-    getAllTasks = (req: Request, res: Response<ApiResponse<Task[]>>): void  => {
+    getAllTasks = async (req: Request, res: Response<ApiResponse<Task[]>>): Promise<void>  => {
         try {
-            const tasks = this.taskService.getAll();
+            const tasks = await this.taskService.getAll();
             res.status(200).json({
                 success: true,
                 data: tasks
@@ -22,10 +22,10 @@ export class TaskController {
         }
     }
 
-    getTaskById = (req: Request<{id: string}>, res: Response<ApiResponse<Task>>): void => {
+    getTaskById = async (req: Request<{id: string}>, res: Response<ApiResponse<Task>>): Promise<void> => {
         try{
             const {id} = req.params;
-            const task = this.taskService.getById(id);
+            const task = await this.taskService.getById(id);
 
             if(!task) {
                 res.status(404).json({
@@ -43,7 +43,7 @@ export class TaskController {
         }
     }
 
-    createTask = (req: Request<{}, {}, CreateTaskDTO>, res: Response<ApiResponse<Task>>): void => {
+    createTask = async (req: Request<{}, {}, CreateTaskDTO>, res: Response<ApiResponse<Task>>): Promise<void> => {
         try {
             const taskData: CreateTaskDTO = req.body;
 
@@ -63,7 +63,7 @@ export class TaskController {
                 return;
             }
 
-            const newTask = this.taskService.create(taskData);
+            const newTask = await this.taskService.create(taskData);
 
             res.status(201).json({
                 success: true,
@@ -75,7 +75,7 @@ export class TaskController {
         }
     }
 
-    updateTask = (req: Request<{id: string}, {}, UpdateTaskDTO>, res: Response<ApiResponse<Task>>): void => {
+    updateTask = async (req: Request<{id: string}, {}, UpdateTaskDTO>, res: Response<ApiResponse<Task>>): Promise<void> => {
         try {
             const {id} = req.params;
 
@@ -106,7 +106,7 @@ export class TaskController {
             }
 
 
-            const updatedTask = this.taskService.update(id, taskData)
+            const updatedTask = await this.taskService.update(id, taskData)
 
             if (!updatedTask) {
                 res.status(404).json({
@@ -127,11 +127,11 @@ export class TaskController {
         }
     }
 
-    deleteTask = (req: Request<{id: string}, {}, {}>, res: Response<ApiResponse>): void => {
+    deleteTask = async (req: Request<{id: string}, {}, {}>, res: Response<ApiResponse>): Promise<void> => {
         try {
             const {id} = req.params;
         
-            const deleted = this.taskService.delete(id);
+            const deleted = await this.taskService.delete(id);
 
             if (!deleted) {
                  res.status(404).json({

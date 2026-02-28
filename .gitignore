@@ -25,3 +25,4 @@ yarn.lock.pm
 .DS_Store
 Thumbs.db
 .vscode
+/src/generated/prisma
