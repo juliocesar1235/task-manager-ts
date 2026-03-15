@@ -45,25 +45,7 @@ export class TaskController {
 
     createTask = async (req: Request<{}, {}, CreateTaskDTO>, res: Response<ApiResponse<Task>>): Promise<void> => {
         try {
-            const taskData: CreateTaskDTO = req.body;
-
-            if (!taskData.title || taskData.title.trim() === '') {
-                res.status(400).json({
-                    success: false,
-                    message: 'Title is required',
-                });
-                return;
-            }
-
-            if (taskData.status && !TASK_STATUSES.includes(taskData.status)) {
-                res.status(400).json({
-                    success: false,
-                    message: `Invalid status. Must be one of: ${TASK_STATUSES.join(', ')}`,
-                });
-                return;
-            }
-
-            const newTask = await this.taskService.create(taskData);
+            const newTask = await this.taskService.create(req.body);
 
             res.status(201).json({
                 success: true,
@@ -79,34 +61,7 @@ export class TaskController {
         try {
             const {id} = req.params;
 
-            const taskData: UpdateTaskDTO = req.body;
-
-            if (!taskData.title && !taskData.description && !taskData.status){
-                res.status(400).json({
-                    success: false,
-                    message: 'At least one field (title,description,status) is required to update',
-                });
-                return;
-            }
-
-            if (!taskData.description || taskData.description.trim() === '') {
-                res.status(400).json({
-                    success: false,
-                    message: 'Cannot add empty descriptions',
-                });
-                return;
-            }
-
-            if (taskData.status && !TASK_STATUSES.includes(taskData.status)) {
-                res.status(400).json({
-                    success: false,
-                    message: `Invalid status. Must be one of: ${TASK_STATUSES.join(', ')}`,
-                });
-                return;
-            }
-
-
-            const updatedTask = await this.taskService.update(id, taskData)
+            const updatedTask = await this.taskService.update(id, req.body)
 
             if (!updatedTask) {
                 res.status(404).json({

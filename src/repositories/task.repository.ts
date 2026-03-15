@@ -2,7 +2,7 @@ import { PrismaClient } from "../generated/prisma/client";
 import { PrismaClientKnownRequestError } from "../generated/prisma/internal/prismaNamespace";
 import type { PrismaService } from "../lib/prisma";
 import type { Task } from "../models/task.model";
-import type { CreateTaskDTO, UpdateTaskDTO } from "../types/task.dto";
+import type { CreateTaskInput, UpdateTaskInput } from "../types/task.dto";
 import type { ITaskRepository } from "./interfaces/task.repository.interface";
 
 
@@ -21,17 +21,17 @@ export class TaskRepository implements ITaskRepository {
         });
     }
 
-    async create(data: CreateTaskDTO): Promise<Task> {
+    async create(data: CreateTaskInput): Promise<Task> {
         return this.prisma.task.create({
             data: {
                 title: data.title,
-                description: data.description ?? '',
+                description: data.description ?? null,
                 status: data.status ?? 'PENDING',
             }
         });
     }
 
-    async update(id: string, data: UpdateTaskDTO): Promise<Task | null> {
+    async update(id: string, data: UpdateTaskInput): Promise<Task | null> {
         try {
             return await this.prisma.task.update({
                 where: {id},

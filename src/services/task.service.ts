@@ -1,6 +1,6 @@
 import type { Task } from "../models/task.model";
 import type { ITaskRepository } from "../repositories/interfaces/task.repository.interface";
-import type { CreateTaskDTO, UpdateTaskDTO } from "../types/task.dto";
+import type { CreateTaskDTO, CreateTaskInput, UpdateTaskDTO, UpdateTaskInput } from "../types/task.dto";
 
 
 export class TaskService {
@@ -15,11 +15,21 @@ export class TaskService {
     }
 
     create(data: CreateTaskDTO): Promise<Task> {
-        return this.taskRepository.create(data);
+        const taskToCreate: CreateTaskInput = {
+            title: data.title,
+            ...(data.description !== undefined && { description: data.description }),
+            ...(data.status      !== undefined && { status: data.status }),
+        }
+        return this.taskRepository.create(taskToCreate);
     }
 
     update(id: string, data: UpdateTaskDTO): Promise<Task | null> {
-        return this.taskRepository.update(id, data)
+        const taskToUpdate: UpdateTaskInput = {
+        ...(data.title       !== undefined && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.status      !== undefined && { status: data.status }),
+        }
+        return this.taskRepository.update(id, taskToUpdate);
     }
 
     delete(id: string): Promise<boolean> {
